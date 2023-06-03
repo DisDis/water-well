@@ -1,0 +1,174 @@
+  esphome:
+    name: water-well
+    platform: ESP32
+    board: esp32dev
+
+  
+  # Example configuration entry
+  binary_sensor:
+    - platform: gpio
+      pin:
+        number: GPIO23
+        mode:
+          input: true
+          pullup: true
+      filters:
+          - delayed_on: 10ms
+          - delayed_off: 10ms
+      name: "Door"
+      device_class: door
+  
+  
+  # Example configuration entry
+  dallas:
+    pin: GPIO22
+    update_interval: 10s
+
+  
+  switch:
+   - platform: gpio
+     name: "Termo"
+     pin: GPIO19
+     id: relay_termo
+   - platform: gpio
+     name: "Water pump"
+     pin: GPIO18
+     id: relay_pump
+   - platform: gpio
+     pin: GPIO4
+     name: button_on_off
+     on_turn_on:
+        - delay: 100ms
+        - switch.turn_on: relay_pump
+     on_turn_off:
+        - delay: 100ms
+        - switch.turn_off: relay_pump
+#      on_click:
+#       min_length: 50ms
+#       max_length: 350ms
+#       then:
+#        - switch.turn_on: relay_pump
+#      on_release:
+#       then:
+#        - switch.turn_off: relay_pump
+#      on_press:
+#        then:
+#         - switch.toggle: relay_pump
+   - platform: safe_mode
+     name: "Water well Room Restart (Safe Mode)"
+  
+  
+  #Термостат на обогрев
+  climate:
+    - platform: thermostat
+      name: esp_thermostat
+      sensor: temperature_well
+      min_idle_time: 30s
+      min_heating_off_time: 100s
+      min_heating_run_time: 30s
+      heat_action:
+       - switch.turn_on: relay_termo
+      idle_action:
+       - switch.turn_off: relay_termo
+      default_preset: "Home"
+      visual:
+        min_temperature: 2
+        max_temperature: 25
+        temperature_step: 0.1
+      preset:
+       - name: "Home"
+         default_target_temperature_low: 3 °C
+  
+  
+  # OTA configuration entry
+  ota:
+    safe_mode: true
+    password: !secret ota_password
+    on_begin:
+      then:
+        - logger.log: "OTA start"
+    on_progress:
+      then:
+        - logger.log:
+            format: "OTA progress %0.1f%%"
+            args: ["x"]
+    on_end:
+      then:
+        - logger.log: "OTA end"
+    on_error:
+      then:
+        - logger.log:
+            format: "OTA update error %d"
+            args: ["x"]
+  
+  # WebServer configuration entry
+  web_server:
+    port: 80
+    version: 1
+    auth:
+      username: !secret web_server_user
+      password: !secret web_server_password
+  
+  # Native API configuration entry
+  api:
+    password: !secret api_password
+  
+  # Individual sensors
+  sensor:
+    - platform: dallas
+      #address: 0x1c0000031edd2a28
+      index: 0
+      name: "Temperature"
+      id: temperature_well
+
+    - platform: wifi_signal
+      name: "WiFi Signal Sensor"
+      update_interval: 60s
+
+    - platform: uptime
+      name: Uptime Sensor
+      id: uptime_sensor
+      update_interval: 60s
+      on_raw_value:
+        then:
+          - text_sensor.template.publish:
+              id: uptime_human
+              state: !lambda |-
+                int seconds = round(id(uptime_sensor).raw_state);
+                int days = seconds / (24 * 3600);
+                seconds = seconds % (24 * 3600);
+                int hours = seconds / 3600;
+                seconds = seconds % 3600;
+                int minutes = seconds /  60;
+                seconds = seconds % 60;
+                return (
+                  (days ? to_string(days) + "d " : "") +
+                  (hours ? to_string(hours) + "h " : "") +
+                  (minutes ? to_string(minutes) + "m " : "") +
+                  (to_string(seconds) + "s")
+                ).c_str();
+  text_sensor:
+        - platform: template
+          name: "Uptime Human Readable"
+          id: uptime_human
+          icon: mdi:clock-start
+        - platform: version
+          name: "Version"
+  network:
+  wifi:
+        ssid: !secret wifi_ssid
+        password: !secret wifi_password
+        ap:
+            ssid: !secret ota_wifi_ssid
+            password: !secret ota_wifi_password
+#  button:
+#   - platform: template
+#     name: "Start/Stop button"
+#     id: button_on_off
+    # Optional variables:
+     #icon: "mdi:emoticon-outline"
+#     on_press:
+#       - logger.log: "Button Start/Stop pressed"            
+#  logger:
+#    level: VERBOSE
+            
