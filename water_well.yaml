@@ -29,10 +29,14 @@
    - platform: gpio
      name: "Termo"
      pin: GPIO19
+       # mdi:radiator , mdi:radiator-disabled
+     icon: mdi:radiator
      id: relay_termo
    - platform: gpio
      name: "Water pump"
      pin: GPIO18
+     # mdi:water-pump , mdi:water-pump-off
+     icon: mdi:water-pump
      id: relay_pump
    - platform: gpio
      pin: GPIO4
@@ -40,9 +44,11 @@
      on_turn_on:
         - delay: 100ms
         - switch.turn_on: relay_pump
+        - logger.log: "Button Turned On!"
      on_turn_off:
         - delay: 100ms
         - switch.turn_off: relay_pump
+        - logger.log: "Button Turned Off!"
 #      on_click:
 #       min_length: 50ms
 #       max_length: 350ms
@@ -169,6 +175,6 @@
      #icon: "mdi:emoticon-outline"
 #     on_press:
 #       - logger.log: "Button Start/Stop pressed"            
-#  logger:
-#    level: VERBOSE
+  # logger:
+  #   level: VERBOSE
             
