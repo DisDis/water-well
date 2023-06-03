@@ -17,7 +17,18 @@
           - delayed_off: 10ms
       name: "Door"
       device_class: door
-  
+    - platform: gpio
+      pin: GPIO4
+      name: button_on_off
+      on_press:
+          - delay: 100ms
+          - switch.turn_on: relay_pump
+          - logger.log: "Button Turned On!"
+      on_release:
+          - delay: 100ms
+          - switch.turn_off: relay_pump
+          - logger.log: "Button Turned Off!"
+    
   
   # Example configuration entry
   dallas:
@@ -38,17 +49,7 @@
      # mdi:water-pump , mdi:water-pump-off
      icon: mdi:water-pump
      id: relay_pump
-   - platform: gpio
-     pin: GPIO4
-     name: button_on_off
-     on_turn_on:
-        - delay: 100ms
-        - switch.turn_on: relay_pump
-        - logger.log: "Button Turned On!"
-     on_turn_off:
-        - delay: 100ms
-        - switch.turn_off: relay_pump
-        - logger.log: "Button Turned Off!"
+
 #      on_click:
 #       min_length: 50ms
 #       max_length: 350ms
