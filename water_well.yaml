@@ -19,11 +19,16 @@
       device_class: door
     - platform: gpio
       pin: GPIO4
-      name: button_on_off
+      name: "Start/Stop button"
+      id: button_on_off
       on_press:
           - delay: 100ms
-          - switch.turn_on: relay_pump
           - logger.log: "Button Turned On!"
+          - if:
+             condition:
+               - switch.is_on: allow_button1
+             then:
+               - switch.turn_on: relay_pump
       on_release:
           - delay: 100ms
           - switch.turn_off: relay_pump
@@ -49,21 +54,15 @@
      # mdi:water-pump , mdi:water-pump-off
      icon: mdi:water-pump
      id: relay_pump
-
-#      on_click:
-#       min_length: 50ms
-#       max_length: 350ms
-#       then:
-#        - switch.turn_on: relay_pump
-#      on_release:
-#       then:
-#        - switch.turn_off: relay_pump
-#      on_press:
-#        then:
-#         - switch.toggle: relay_pump
    - platform: safe_mode
      name: "Water well Room Restart (Safe Mode)"
-  
+   - platform: template
+     name: "Allow control via button"
+     id: allow_button1
+     icon: mdi:account-hard-hat
+     optimistic: true
+     
+    
   
   #Термостат на обогрев
   climate:
@@ -168,14 +167,7 @@
         ap:
             ssid: !secret ota_wifi_ssid
             password: !secret ota_wifi_password
-#  button:
-#   - platform: template
-#     name: "Start/Stop button"
-#     id: button_on_off
-    # Optional variables:
-     #icon: "mdi:emoticon-outline"
-#     on_press:
-#       - logger.log: "Button Start/Stop pressed"            
+        
   # logger:
   #   level: VERBOSE
             
