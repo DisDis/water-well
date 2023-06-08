@@ -60,6 +60,7 @@
      name: "Allow control via button"
      id: allow_button1
      restore_mode: RESTORE_DEFAULT_ON
+     restore_state: true
      icon: mdi:account-hard-hat
      optimistic: true
      
@@ -118,7 +119,7 @@
   
   # Native API configuration entry
   api:
-    password: !secret api_password
+  #  password: !secret api_password
     encryption:
       key: !secret api_encrypt_key
   
