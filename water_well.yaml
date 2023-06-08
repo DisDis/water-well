@@ -38,7 +38,7 @@
   # Example configuration entry
   dallas:
     pin: GPIO22
-    update_interval: 10s
+    update_interval: 30s
 
   
   switch:
@@ -59,6 +59,7 @@
    - platform: template
      name: "Allow control via button"
      id: allow_button1
+     restore_mode: RESTORE_DEFAULT_ON
      icon: mdi:account-hard-hat
      optimistic: true
      
@@ -118,6 +119,8 @@
   # Native API configuration entry
   api:
     password: !secret api_password
+    encryption:
+      key: !secret api_encrypt_key
   
   # Individual sensors
   sensor:
